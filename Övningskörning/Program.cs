@@ -110,6 +110,10 @@ namespace Övningskörning
             years = DateTime.Today.Year - birthday.Year;
             months = DateTime.Today.Month - birthday.Month;
             int days = DateTime.Today.Day - birthday.Day;
+            if (days == 0 && months == 0)
+            {
+                Console.WriteLine("Grattis på födelsedagen!");
+            }
             if (days < 0)
             {
                 months--;
