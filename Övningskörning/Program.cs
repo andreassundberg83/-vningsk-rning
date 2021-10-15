@@ -8,9 +8,10 @@ namespace Övningskörning
         static void Main(string[] args)
         {            
             Console.Write("När är du född? (ååååmmdd): ");
-            int birthday = CheckIfValidDate(Console.ReadLine());
-            Console.WriteLine(GetAgeString(GetAgeInt(birthday)));
-            Console.WriteLine(WhatCanBePracticed(birthday));
+            DateTime birthday = CheckIfValidDate(Console.ReadLine());
+            GetAge(birthday, out int years, out int months);
+            Console.WriteLine(GetAgeString(years, months));
+            Console.WriteLine(WhatCanBePracticed(years, months));
             Console.ReadKey();          
         }
         /// <summary>
@@ -18,27 +19,23 @@ namespace Övningskörning
         /// </summary>
         /// <param name="userInput"></param>
         /// <returns></returns>
-        static int CheckIfValidDate(string userInput)
-        {
-            string str_birthday = "";
-            int int_birthday = 0;
+        static DateTime CheckIfValidDate(string userInput)
+        {            
             bool loopEnder = false;
-            DateTime dt_birthday;
+            DateTime dt_birthday = DateTime.Today;
             do
             {
                 if (userInput.Length == 8)
                 {
                     try
                     {
-                        str_birthday = userInput.Insert(4, "-");
-                        str_birthday = str_birthday.Insert(7, "-");
-                        dt_birthday = DateTime.Parse(str_birthday);
-                        int_birthday = Int32.Parse(userInput);
-                        loopEnder = DateTime.TryParse(str_birthday, out DateTime dt_test) && Int32.TryParse(userInput, out int int_test);
+                        userInput = userInput.Insert(4, "-");
+                        userInput = userInput.Insert(7, "-");                        
+                        loopEnder = DateTime.TryParse(userInput, out dt_birthday);
                         if (dt_birthday > DateTime.Today)
                         {
-                            str_birthday = DateTime.Today.ToString("yyyyMMdd");
-                            int_birthday = Convert.ToInt32(str_birthday);
+                            dt_birthday = DateTime.Today;
+                            
                         }                        
                     }
                     catch (Exception e)
@@ -59,7 +56,7 @@ namespace Övningskörning
 
             } while (loopEnder == false);
             
-            return int_birthday;
+            return dt_birthday;
 
         }
         /// <summary>
@@ -67,11 +64,10 @@ namespace Övningskörning
         /// </summary>
         /// <param name="birthday"></param>
         /// <returns></returns>
-        static string WhatCanBePracticed(int birthday)
+        static string WhatCanBePracticed(int years, int months)
         {
-            string returnValue = "Du får övningsköra följande fordon:\n";
-            int age = GetAgeInt(birthday);
-            byte ageCategory = GetAgeCategory(age);
+            string returnValue = "Du får övningsköra följande fordon:\n";            
+            byte ageCategory = GetAgeCategory(years, months);
             List<string> typeOfVehicle = new List<string>()
             {
                 "Moped klass I (EU-Moped)\n",
@@ -105,56 +101,69 @@ namespace Övningskörning
             return returnValue;
         }
         /// <summary>
-        /// Calculates age and return an integer.
+        /// Calculates age and returns an integer.
         /// </summary>
         /// <param name="birthday"></param>
         /// <returns></returns>
-        static int GetAgeInt(int birthday)
+        static void GetAge(DateTime birthday, out int years, out int months)
         {
-            string date_to_string = DateTime.Today.ToString("yyyyMMdd");
-            int today = Convert.ToInt32(date_to_string);                        
-            return (today - birthday);
+            years = DateTime.Today.Year - birthday.Year;
+            months = DateTime.Today.Month - birthday.Month;
+            int days = DateTime.Today.Day - birthday.Day;
+            if (days < 0)
+            {
+                months--;
+            }
+            if (months < 0)
+            {
+                years--;
+                months += 12;
+            }
         }
         /// <summary>
         /// Returns an age category according to your age.
         /// </summary>
         /// <param name="age"></param>
         /// <returns></returns>
-        static byte GetAgeCategory(int age)
+        static byte GetAgeCategory(int years, int months)
         {
             byte ageCategory;
-            switch (age)
+            switch (years)
             {
-                case < 140900:
+                case < 14:
                     ageCategory = 0;
                     break;
-                case >= 140900 and < 150900:
-                    ageCategory = 1;
+                case 14:
+                    if (months >= 9) ageCategory = 1; else ageCategory = 0;
                     break;
-                case >= 150900 and < 160000:
-                    ageCategory = 2;
+                case 15:
+                    if (months >= 9) ageCategory = 2; else ageCategory = 1;
                     break;
-                case >= 160000 and < 170600:
+                case 16:
                     ageCategory = 3;
                     break;
-                case >= 170600 and < 180000:
-                    ageCategory = 4;
+                case 17:
+                    if (months >= 6) ageCategory = 4; else ageCategory = 3;
                     break;
-                case >= 180000 and < 190600:
+                case 18:
                     ageCategory = 5;
                     break;
-                case >= 190600 and < 210000:
+                case 19:
+                    if (months >= 6) ageCategory = 6; else ageCategory = 5;
+                    break;
+                case 20:
+                    ageCategory = 6;
+                    break;
+                case 21:
+                case 22:
                     ageCategory = 7;
                     break;
-                case >= 210000 and < 230000:
-                    ageCategory = 7;
-                    break;
-                case >= 750000 and < 1250000:
+                case >= 75 and <= 125:
                     ageCategory = 9;
                     break;
-                case >= 1250000:
+                case > 125:
                     ageCategory = 10;
-                    break;
+                    break;       
                 default:
                     ageCategory = 8;
                     break;
@@ -166,10 +175,8 @@ namespace Övningskörning
         /// </summary>
         /// <param name="age"></param>
         /// <returns></returns>
-        static string GetAgeString(int age)
-        {
-            int years = age/10000;
-            int months = (age-years*10000) / 100;
+        static string GetAgeString(int years, int months)
+        {                                    
             return $"Du är {years} år och {months} månader.";
         }
        
